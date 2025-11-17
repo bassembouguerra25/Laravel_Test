@@ -204,6 +204,10 @@ class BookingController extends Controller
                         'status' => 'success',
                     ]);
                 }
+
+                // Send confirmation notification to customer via queue
+                $booking->load('user', 'ticket.event');
+                $booking->user->notify(new \App\Notifications\BookingConfirmedNotification($booking->fresh()));
             } else {
                 $booking->update($validated);
             }
