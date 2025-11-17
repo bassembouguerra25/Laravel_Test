@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponseTrait;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +51,7 @@ class UserController extends Controller
 
         return $this->successResponse(
             [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
             'User registered successfully',
@@ -88,7 +89,7 @@ class UserController extends Controller
 
         return $this->successResponse(
             [
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
             'Login successful'
@@ -124,7 +125,7 @@ class UserController extends Controller
 
         return $this->successResponse(
             [
-                'user' => $user,
+                'user' => new UserResource($user),
             ]
         );
     }
