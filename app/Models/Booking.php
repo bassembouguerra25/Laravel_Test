@@ -50,7 +50,7 @@ class Booking extends Model
     protected function casts(): array
     {
         return [
-            'status' => 'string',
+            // status is already a string by default, no cast needed
         ];
     }
 
