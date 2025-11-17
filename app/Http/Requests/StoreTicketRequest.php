@@ -18,7 +18,23 @@ class StoreTicketRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Ticket::class);
+        // Check if user can create tickets in general
+        if (!$this->user()->can('create', \App\Models\Ticket::class)) {
+            return false;
+        }
+
+        // If organizer (and not admin), verify they're creating ticket for their own event
+        if ($this->user()->isOrganizer() && !$this->user()->isAdmin()) {
+            $eventId = $this->input('event_id');
+            if ($eventId) {
+                $event = \App\Models\Event::find($eventId);
+                if ($event && $event->created_by !== $this->user()->id) {
+                    return false; // Organizer cannot create ticket for other organizer's event
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

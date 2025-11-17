@@ -10,6 +10,7 @@ use App\Http\Traits\ApiResponseTrait;
 use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Ticket Controller
@@ -95,6 +96,9 @@ class TicketController extends Controller
         $ticket = Ticket::create($validated);
         $ticket->load(['event', 'bookings']);
 
+        // Clear events cache as tickets are included in events list
+        Cache::flush();
+
         return $this->successResponse(
             new TicketResource($ticket),
             'Ticket created successfully',
@@ -136,6 +140,9 @@ class TicketController extends Controller
         $ticket->update($validated);
         $ticket->load(['event', 'bookings']);
 
+        // Clear events cache as tickets are included in events list
+        Cache::flush();
+
         return $this->successResponse(
             new TicketResource($ticket),
             'Ticket updated successfully'
@@ -157,6 +164,9 @@ class TicketController extends Controller
         }
 
         $ticket->delete();
+
+        // Clear events cache as tickets are included in events list
+        Cache::flush();
 
         return $this->successResponse(
             null,

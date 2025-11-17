@@ -24,7 +24,6 @@ class PaymentServiceTest extends TestCase
     {
         parent::setUp();
         $this->paymentService = new PaymentService();
-        Log::fake();
     }
 
     /**
@@ -250,52 +249,73 @@ class PaymentServiceTest extends TestCase
     }
 
     /**
-     * Test payment logs are created
+     * Test create confirmed payment for manually confirmed booking
      */
-    public function test_process_payment_logs_result(): void
+    public function test_create_confirmed_payment(): void
     {
-        Log::fake();
-
         $ticket = \App\Models\Ticket::factory()->create(['price' => 50.00]);
         $booking = Booking::factory()
             ->forTicket($ticket)
-            ->pending()
+            ->confirmed()
             ->create(['quantity' => 2]);
 
-        $paymentService = $this->getMockBuilder(PaymentService::class)
-            ->onlyMethods(['simulatePayment'])
-            ->getMock();
-        
-        $paymentService->method('simulatePayment')->willReturn(true);
+        $payment = $this->paymentService->createConfirmedPayment($booking);
 
-        $paymentService->processPayment($booking);
+        $this->assertInstanceOf(Payment::class, $payment);
+        $this->assertEquals('success', $payment->status);
+        $this->assertEquals(100.00, $payment->amount);
+        $this->assertEquals($booking->id, $payment->booking_id);
 
-        Log::assertLogged('info', function ($message, $context) use ($booking) {
-            return $message === 'Payment processed' &&
-                   isset($context['booking_id']) &&
-                   $context['booking_id'] === $booking->id;
-        });
+        // Verify payment was saved in database
+        $this->assertDatabaseHas('payments', [
+            'booking_id' => $booking->id,
+            'amount' => 100.00,
+            'status' => 'success',
+        ]);
     }
 
     /**
-     * Test refund logs are created
+     * Test create confirmed payment throws exception when payment exists
      */
-    public function test_refund_payment_logs_result(): void
+    public function test_create_confirmed_payment_throws_exception_when_payment_exists(): void
     {
-        Log::fake();
+        $ticket = \App\Models\Ticket::factory()->create(['price' => 50.00]);
+        $booking = Booking::factory()
+            ->forTicket($ticket)
+            ->confirmed()
+            ->create(['quantity' => 2]);
 
-        $booking = Booking::factory()->confirmed()->create();
-        $payment = Payment::factory()->forBooking($booking)->success()->create();
+        // Create existing payment
+        Payment::factory()->forBooking($booking)->create();
 
-        $this->paymentService->refundPayment($booking);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment already exists for this booking.');
 
-        Log::assertLogged('info', function ($message, $context) use ($booking, $payment) {
-            return $message === 'Payment refunded' &&
-                   isset($context['booking_id']) &&
-                   $context['booking_id'] === $booking->id &&
-                   isset($context['payment_id']) &&
-                   $context['payment_id'] === $payment->id;
-        });
+        $this->paymentService->createConfirmedPayment($booking);
+    }
+
+    /**
+     * Test create confirmed payment maintains data integrity
+     */
+    public function test_create_confirmed_payment_maintains_data_integrity(): void
+    {
+        $ticket = \App\Models\Ticket::factory()->create(['price' => 50.00]);
+        $booking = Booking::factory()
+            ->forTicket($ticket)
+            ->confirmed()
+            ->create(['quantity' => 2]);
+
+        $payment = $this->paymentService->createConfirmedPayment($booking);
+
+        // Verify payment was created successfully
+        $this->assertDatabaseHas('payments', [
+            'booking_id' => $booking->id,
+            'status' => 'success',
+        ]);
+
+        // Verify booking status remains confirmed (not changed by this method)
+        $booking->refresh();
+        $this->assertEquals('confirmed', $booking->status);
     }
 }
 

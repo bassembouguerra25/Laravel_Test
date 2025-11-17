@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Ticket;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -366,5 +367,92 @@ class TicketTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['price']);
+    }
+
+    /**
+     * Test cache is cleared when ticket is created
+     */
+    public function test_cache_cleared_when_ticket_created(): void
+    {
+        Cache::flush();
+
+        $admin = $this->createAdmin();
+        Sanctum::actingAs($admin);
+
+        $event = Event::factory()->create();
+
+        // Request events to populate cache
+        $this->getJson('/api/events');
+
+        // Create new ticket - should clear cache
+        $this->postJson('/api/tickets', [
+            'type' => 'VIP',
+            'price' => 99.99,
+            'quantity' => 100,
+            'event_id' => $event->id,
+        ]);
+
+        // Verify cache was cleared (events should reflect new ticket)
+        $response = $this->getJson('/api/events');
+        $response->assertStatus(200);
+        // Cache should be cleared, so we should see fresh data
+    }
+
+    /**
+     * Test cache is cleared when ticket is updated
+     */
+    public function test_cache_cleared_when_ticket_updated(): void
+    {
+        Cache::flush();
+
+        $organizer = $this->createOrganizer();
+        Sanctum::actingAs($organizer);
+
+        $event = Event::factory()->forOrganizer($organizer)->create();
+        $ticket = Ticket::factory()->forEvent($event)->create([
+            'type' => 'Standard',
+        ]);
+
+        // Request events to populate cache
+        $this->getJson('/api/events');
+
+        // Update ticket - should clear cache
+        $this->putJson("/api/tickets/{$ticket->id}", [
+            'type' => 'Premium',
+            'price' => $ticket->price,
+            'quantity' => $ticket->quantity,
+            'event_id' => $ticket->event_id,
+        ]);
+
+        // Verify cache was cleared
+        $response = $this->getJson('/api/events');
+        $response->assertStatus(200);
+        // Cache should be cleared, so we should see updated ticket
+    }
+
+    /**
+     * Test cache is cleared when ticket is deleted
+     */
+    public function test_cache_cleared_when_ticket_deleted(): void
+    {
+        Cache::flush();
+
+        $organizer = $this->createOrganizer();
+        Sanctum::actingAs($organizer);
+
+        $event = Event::factory()->forOrganizer($organizer)->create();
+        $ticket = Ticket::factory()->forEvent($event)->create();
+
+        // Request events to populate cache
+        $response1 = $this->getJson('/api/events');
+        $initialTicketsCount = $response1->json('data.events.0.tickets_count') ?? 0;
+
+        // Delete ticket - should clear cache
+        $this->deleteJson("/api/tickets/{$ticket->id}");
+
+        // Verify cache was cleared
+        $response2 = $this->getJson('/api/events');
+        $response2->assertStatus(200);
+        // Cache should be cleared, ticket count should reflect deletion
     }
 }

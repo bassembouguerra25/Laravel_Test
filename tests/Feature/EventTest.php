@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -343,5 +344,116 @@ class EventTest extends TestCase
         $response->assertStatus(200);
         $this->assertCount(1, $response->json('data.events'));
         $this->assertEquals('Concert Event', $response->json('data.events.0.title'));
+    }
+
+    /**
+     * Test events list is cached
+     */
+    public function test_events_list_is_cached(): void
+    {
+        Cache::flush();
+
+        $user = $this->createUser();
+        Sanctum::actingAs($user);
+
+        Event::factory()->count(3)->create();
+
+        // First request - should query database and cache
+        $response1 = $this->getJson('/api/events');
+        $response1->assertStatus(200);
+        $this->assertCount(3, $response1->json('data.events'));
+
+        // Second request - should use cache (no new events created)
+        $response2 = $this->getJson('/api/events');
+        $response2->assertStatus(200);
+        $this->assertCount(3, $response2->json('data.events'));
+
+        // Verify cache was used (events count should be same even if we add new events)
+        Event::factory()->create(); // This won't appear until cache expires
+
+        $response3 = $this->getJson('/api/events');
+        $response3->assertStatus(200);
+        $this->assertCount(3, $response3->json('data.events')); // Still 3 from cache
+    }
+
+    /**
+     * Test cache is cleared when event is created
+     */
+    public function test_cache_cleared_when_event_created(): void
+    {
+        Cache::flush();
+
+        $admin = $this->createAdmin();
+        Sanctum::actingAs($admin);
+
+        Event::factory()->count(2)->create();
+
+        // Request events to populate cache
+        $this->getJson('/api/events');
+
+        // Create new event - should clear cache
+        $this->postJson('/api/events', [
+            'title' => 'New Event',
+            'description' => 'New Description',
+            'date' => now()->addDays(30)->toISOString(),
+            'location' => 'New Location',
+        ]);
+
+        // Verify cache was cleared by checking if new event appears
+        $response = $this->getJson('/api/events');
+        $this->assertGreaterThanOrEqual(3, $response->json('data.events')); // At least 3 events (2 + 1 new)
+    }
+
+    /**
+     * Test cache is cleared when event is updated
+     */
+    public function test_cache_cleared_when_event_updated(): void
+    {
+        Cache::flush();
+
+        $organizer = $this->createOrganizer();
+        Sanctum::actingAs($organizer);
+
+        $event = Event::factory()->forOrganizer($organizer)->create([
+            'title' => 'Original Title',
+        ]);
+
+        // Request events to populate cache
+        $this->getJson('/api/events');
+
+        // Update event - should clear cache
+        $this->putJson("/api/events/{$event->id}", [
+            'title' => 'Updated Title',
+            'date' => now()->addDays(30)->toISOString(),
+            'location' => $event->location,
+        ]);
+
+        // Verify cache was cleared by checking if updated event appears
+        $response = $this->getJson('/api/events');
+        $this->assertStringContainsString('Updated Title', json_encode($response->json('data.events')));
+    }
+
+    /**
+     * Test cache is cleared when event is deleted
+     */
+    public function test_cache_cleared_when_event_deleted(): void
+    {
+        Cache::flush();
+
+        $organizer = $this->createOrganizer();
+        Sanctum::actingAs($organizer);
+
+        $event = Event::factory()->forOrganizer($organizer)->create();
+
+        // Request events to populate cache
+        $response1 = $this->getJson('/api/events');
+        $initialCount = count($response1->json('data.events'));
+
+        // Delete event - should clear cache
+        $this->deleteJson("/api/events/{$event->id}");
+
+        // Verify cache was cleared by checking if event count decreased
+        $response2 = $this->getJson('/api/events');
+        $this->assertLessThan($initialCount, count($response2->json('data.events')));
     }
 }

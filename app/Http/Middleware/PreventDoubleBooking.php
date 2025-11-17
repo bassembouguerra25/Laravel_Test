@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Booking;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,9 +22,9 @@ class PreventDoubleBooking
      *
      * @param \Illuminate\Http\Request $request
      * @param \Closure $next
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response|\Illuminate\Http\JsonResponse
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         // Only apply to booking creation requests
         if (!$request->user() || !$request->has('ticket_id')) {
@@ -40,7 +41,7 @@ class PreventDoubleBooking
             ->first();
 
         if ($existingBooking) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'message' => 'You already have an active booking for this ticket.',
                 'errors' => [

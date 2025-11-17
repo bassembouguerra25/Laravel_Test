@@ -8,7 +8,7 @@ use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Http\Traits\ApiResponseTrait;
 use App\Models\Booking;
-use App\Models\Payment;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +21,23 @@ use Illuminate\Support\Facades\DB;
 class BookingController extends Controller
 {
     use ApiResponseTrait;
+
+    /**
+     * Payment service instance
+     *
+     * @var \App\Services\PaymentService
+     */
+    protected PaymentService $paymentService;
+
+    /**
+     * Create a new controller instance
+     *
+     * @param \App\Services\PaymentService $paymentService
+     */
+    public function __construct(PaymentService $paymentService)
+    {
+        $this->paymentService = $paymentService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -90,9 +107,34 @@ class BookingController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        // Check if event is past before starting transaction
+        $ticket = \App\Models\Ticket::with('event')->findOrFail($validated['ticket_id']);
+        
+        // Check if event exists and is in the past
+        if ($ticket->event_id && $ticket->event && $ticket->event->date) {
+            $event = $ticket->event;
+            
+            // Date is already cast to Carbon in Event model (cast: 'datetime')
+            // Use it directly - if it's already Carbon, use it, otherwise parse it
+            $eventDate = $event->date instanceof \Illuminate\Support\Carbon 
+                ? $event->date 
+                : \Illuminate\Support\Carbon::parse($event->date);
+            
+            // Check if event date is in the past
+            // isPast() checks if the date is before now()
+            // Use errorResponse() here as ValidationException is not properly handled outside DB transaction
+            if ($eventDate->isPast()) {
+                return $this->errorResponse(
+                    'Cannot book tickets for past events.',
+                    422,
+                    ['ticket_id' => ['Cannot book tickets for past events.']]
+                );
+            }
+        }
+
         // Use transaction with lock to prevent race conditions
         $booking = DB::transaction(function () use ($validated, $user) {
-            $ticket = \App\Models\Ticket::lockForUpdate()->findOrFail($validated['ticket_id']);
+            $ticket = \App\Models\Ticket::with('event')->lockForUpdate()->findOrFail($validated['ticket_id']);
 
             // Double-check availability with lock
             if ($validated['quantity'] > $ticket->available_quantity) {
@@ -102,15 +144,9 @@ class BookingController extends Controller
                 );
             }
 
-            // Check if event is not past
-            if ($ticket->event->date->isPast()) {
-                throw new \Illuminate\Validation\ValidationException(
-                    validator([], []),
-                    ['ticket_id' => 'Cannot book tickets for past events.']
-                );
-            }
-
-            // Check for existing active booking for this user + ticket
+            // Note: Double booking prevention is handled by PreventDoubleBooking middleware
+            // This check is kept as a defense-in-depth measure in the transaction
+            // to handle edge cases where multiple requests might bypass the middleware
             $existingBooking = Booking::where('user_id', $user->id)
                 ->where('ticket_id', $validated['ticket_id'])
                 ->whereIn('status', ['pending', 'confirmed'])
@@ -174,7 +210,12 @@ class BookingController extends Controller
         DB::transaction(function () use ($booking, $validated) {
             // Handle quantity change - verify availability
             if (isset($validated['quantity']) && $validated['quantity'] != $booking->quantity) {
-                $ticket = $booking->ticket->lockForUpdate();
+                // Load ticket relation if not loaded, then lock it
+                if (!$booking->relationLoaded('ticket')) {
+                    $booking->load('ticket');
+                }
+                
+                $ticket = \App\Models\Ticket::lockForUpdate()->findOrFail($booking->ticket_id);
                 
                 // Calculate available quantity excluding current booking
                 $currentBookedQuantity = $ticket->bookings()
@@ -192,17 +233,13 @@ class BookingController extends Controller
                 }
             }
 
-            // Handle status change to confirmed - create payment
+            // Handle status change to confirmed - create payment using PaymentService
             if (isset($validated['status']) && $validated['status'] === 'confirmed' && $booking->status !== 'confirmed') {
                 $booking->update($validated);
 
-                // Create payment if not exists
+                // Create confirmed payment using PaymentService if not exists
                 if (!$booking->payment) {
-                    Payment::create([
-                        'booking_id' => $booking->id,
-                        'amount' => $booking->fresh()->total_amount, // Recalculate after update
-                        'status' => 'success',
-                    ]);
+                    $this->paymentService->createConfirmedPayment($booking->fresh());
                 }
 
                 // Send confirmation notification to customer via queue
@@ -240,12 +277,21 @@ class BookingController extends Controller
         }
 
         DB::transaction(function () use ($booking) {
-            $booking->update(['status' => 'cancelled']);
-
-            // If payment exists and is successful, set to refunded
+            // If payment exists and is successful, refund using PaymentService
             if ($booking->payment && $booking->payment->isSuccess()) {
-                $booking->payment->update(['status' => 'refunded']);
+                try {
+                    $this->paymentService->refundPayment($booking);
+                } catch (\Exception $e) {
+                    // If refund fails, still cancel the booking but log the error
+                    \Illuminate\Support\Facades\Log::error('Refund failed during cancellation', [
+                        'booking_id' => $booking->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
+
+            // Update booking status to cancelled
+            $booking->update(['status' => 'cancelled']);
         });
 
         $booking->load(['user', 'ticket.event', 'payment']);

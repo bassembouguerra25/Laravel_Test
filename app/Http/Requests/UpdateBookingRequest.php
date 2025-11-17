@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Ticket;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,20 +45,27 @@ class UpdateBookingRequest extends FormRequest
                 'max:10',
                 function ($attribute, $value, $fail) {
                     $booking = $this->route('booking');
-                    if ($booking) {
-                        $ticket = $booking->ticket;
-                        
-                        // Calculate available quantity excluding current booking
-                        $currentBookedQuantity = $ticket->bookings()
-                            ->where('id', '!=', $booking->id)
-                            ->whereIn('status', ['pending', 'confirmed'])
-                            ->sum('quantity');
-                        
-                        $availableQuantity = max(0, $ticket->quantity - $currentBookedQuantity);
-                        
-                        if ($value > $availableQuantity) {
-                            $fail("The requested quantity ({$value}) exceeds available tickets ({$availableQuantity}).");
-                        }
+                    if (!$booking || !$booking->ticket_id) {
+                        return;
+                    }
+
+                    // Get ticket directly from database to avoid relation loading issues
+                    $ticket = Ticket::find($booking->ticket_id);
+                    
+                    if (!$ticket) {
+                        return;
+                    }
+                    
+                    // Calculate available quantity excluding current booking
+                    $currentBookedQuantity = $ticket->bookings()
+                        ->where('id', '!=', $booking->id)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->sum('quantity');
+                    
+                    $availableQuantity = max(0, $ticket->quantity - $currentBookedQuantity);
+                    
+                    if ($value > $availableQuantity) {
+                        $fail("The requested quantity ({$value}) exceeds available tickets ({$availableQuantity}).");
                     }
                 },
             ],

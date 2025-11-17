@@ -106,9 +106,7 @@ class EventController extends Controller
         $event->load(['organizer', 'tickets']);
 
         // Clear events cache when new event is created
-        // Note: In production with Redis, you could use Cache::tags(['events'])->flush()
-        // For now, we'll flush all cache (simple approach)
-        Cache::flush();
+        $this->clearEventsCache();
 
         return $this->successResponse(
             new EventResource($event),
@@ -152,7 +150,7 @@ class EventController extends Controller
         $event->load(['organizer', 'tickets']);
 
         // Clear events cache when event is updated
-        Cache::flush();
+        $this->clearEventsCache();
 
         return $this->successResponse(
             new EventResource($event),
@@ -177,11 +175,31 @@ class EventController extends Controller
         $event->delete();
 
         // Clear events cache when event is deleted
-        Cache::flush();
+        $this->clearEventsCache();
 
         return $this->successResponse(
             null,
             'Event deleted successfully'
         );
+    }
+
+    /**
+     * Clear events cache
+     * 
+     * In production with Redis, you could use Cache::tags(['events'])->flush()
+     * For now, we flush all cache as a simple approach.
+     * In a more sophisticated implementation, we could clear only cache keys
+     * matching 'events_list_*' pattern.
+     *
+     * @return void
+     */
+    protected function clearEventsCache(): void
+    {
+        // Note: In production with Redis and cache tags support, you could use:
+        // Cache::tags(['events'])->flush();
+        
+        // For simplicity and compatibility with all cache drivers, flush all cache
+        // This ensures events list is always fresh after modifications
+        Cache::flush();
     }
 }

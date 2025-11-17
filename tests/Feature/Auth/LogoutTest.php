@@ -18,10 +18,9 @@ class LogoutTest extends TestCase
     public function test_authenticated_user_can_logout(): void
     {
         $user = $this->createUser();
-        Sanctum::actingAs($user);
-
         $token = $user->createToken('test-token')->plainTextToken;
 
+        // Use token for authentication
         $response = $this->postJson('/api/logout', [], [
             'Authorization' => 'Bearer ' . $token,
         ]);

@@ -6,6 +6,8 @@ use App\Models\Booking;
 use App\Models\Event;
 use App\Models\Payment;
 use App\Models\Ticket;
+use App\Notifications\BookingConfirmedNotification;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -93,7 +95,11 @@ class BookingTest extends TestCase
         $customer = $this->createCustomer();
         Sanctum::actingAs($customer);
 
-        $event = Event::factory()->past()->create();
+        // Create event with explicit past date
+        $pastDate = now()->subDays(2);
+        $event = Event::factory()->create([
+            'date' => $pastDate,
+        ]);
         $ticket = Ticket::factory()->forEvent($event)->create();
 
         $response = $this->postJson('/api/bookings', [
@@ -281,6 +287,40 @@ class BookingTest extends TestCase
             'amount' => 100.00, // 50.00 * 2
             'status' => 'success',
         ]);
+    }
+
+    /**
+     * Test confirming booking sends notification to customer
+     */
+    public function test_confirming_booking_sends_notification(): void
+    {
+        Notification::fake();
+
+        $admin = $this->createAdmin();
+        Sanctum::actingAs($admin);
+
+        $customer = $this->createCustomer();
+        $ticket = Ticket::factory()->create(['price' => 50.00]);
+        $booking = Booking::factory()
+            ->forUser($customer)
+            ->forTicket($ticket)
+            ->pending()
+            ->create(['quantity' => 2]);
+
+        $response = $this->putJson("/api/bookings/{$booking->id}", [
+            'status' => 'confirmed',
+        ]);
+
+        $response->assertStatus(200);
+
+        // Verify notification was sent to customer
+        Notification::assertSentTo(
+            $customer,
+            BookingConfirmedNotification::class,
+            function ($notification, $channels) use ($booking) {
+                return $notification->booking->id === $booking->id;
+            }
+        );
     }
 
     /**

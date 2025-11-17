@@ -63,6 +63,46 @@ class PaymentService
     }
 
     /**
+     * Create confirmed payment for a booking
+     * 
+     * Used when booking is manually confirmed (by admin/organizer).
+     * Creates a payment with success status without simulation.
+     *
+     * @param \App\Models\Booking $booking
+     * @return \App\Models\Payment
+     * @throws \Exception
+     */
+    public function createConfirmedPayment(Booking $booking): Payment
+    {
+        // Check if payment already exists
+        if ($booking->payment) {
+            throw new \Exception('Payment already exists for this booking.');
+        }
+
+        $amount = $booking->total_amount;
+
+        // Create confirmed payment directly (manual confirmation)
+        $payment = DB::transaction(function () use ($booking, $amount) {
+            $payment = Payment::create([
+                'booking_id' => $booking->id,
+                'amount' => $amount,
+                'status' => 'success',
+            ]);
+
+            return $payment;
+        });
+
+        // Log payment creation
+        Log::info('Confirmed payment created', [
+            'booking_id' => $booking->id,
+            'amount' => $amount,
+            'status' => 'success',
+        ]);
+
+        return $payment;
+    }
+
+    /**
      * Refund payment for a booking
      *
      * @param \App\Models\Booking $booking
