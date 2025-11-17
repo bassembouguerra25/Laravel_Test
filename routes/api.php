@@ -34,7 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tickets', TicketController::class);
 
     // Bookings routes (customers can create, admin can manage all)
-    Route::apiResource('bookings', BookingController::class);
+    Route::post('/bookings', [BookingController::class, 'store'])->middleware('prevent.double.booking');
+    Route::apiResource('bookings', BookingController::class)->except(['store']);
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 });
 

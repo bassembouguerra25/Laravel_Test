@@ -42,22 +42,20 @@ class EventController extends Controller
             $query->where('created_by', $user->id);
         }
 
-        // Search by title or location
+        // Search by title and location using trait scope
         if ($request->has('search')) {
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
+                $q->searchByTitle($search)
                   ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
-        // Filter by date range
-        if ($request->has('date_from')) {
-            $query->where('date', '>=', $request->get('date_from'));
-        }
-        if ($request->has('date_to')) {
-            $query->where('date', '<=', $request->get('date_to'));
-        }
+        // Filter by date range using trait scope
+        $query->filterByDate(
+            $request->get('date_from'),
+            $request->get('date_to')
+        );
 
         // Sort
         $sortBy = $request->get('sort_by', 'date');

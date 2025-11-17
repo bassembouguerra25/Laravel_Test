@@ -80,4 +80,17 @@ class TicketFactory extends Factory
             'quantity' => $quantity,
         ]);
     }
+
+    /**
+     * Indicate that the ticket is for a specific event.
+     *
+     * @param Event $event
+     * @return static
+     */
+    public function forEvent(Event $event): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'event_id' => $event->id,
+        ]);
+    }
 }
