@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Ticket Model
- * 
+ *
  * Represents a ticket type for an event.
  * Each ticket has a type (VIP, Standard, Premium, etc.), a price and an available quantity.
- * 
+ *
  * @property int $id
  * @property string $type Ticket type (VIP, Standard, Premium, etc.)
  * @property float $price Ticket price
@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $event_id ID of the associated event
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
  * @property-read \App\Models\Event $event The associated event
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
  */
@@ -54,8 +53,6 @@ class Ticket extends Model
 
     /**
      * Relation: A ticket belongs to an event
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function event(): BelongsTo
     {
@@ -64,8 +61,6 @@ class Ticket extends Model
 
     /**
      * Relation: A ticket can have multiple bookings
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function bookings(): HasMany
     {
@@ -74,8 +69,6 @@ class Ticket extends Model
 
     /**
      * Calculate the number of available tickets
-     *
-     * @return int
      */
     public function getAvailableQuantityAttribute(): int
     {

@@ -7,7 +7,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * Common Query Scopes Trait
- * 
+ *
  * Provides reusable query scopes for filtering and searching.
  * Can be used by models that need date filtering and title search functionality.
  */
@@ -16,10 +16,8 @@ trait CommonQueryScopes
     /**
      * Filter by date range
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string|Carbon|null $startDate Start date (Y-m-d format or Carbon instance)
-     * @param string|Carbon|null $endDate End date (Y-m-d format or Carbon instance)
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  string|Carbon|null  $startDate  Start date (Y-m-d format or Carbon instance)
+     * @param  string|Carbon|null  $endDate  End date (Y-m-d format or Carbon instance)
      */
     public function scopeFilterByDate(Builder $query, $startDate = null, $endDate = null): Builder
     {
@@ -39,17 +37,14 @@ trait CommonQueryScopes
     /**
      * Search by title (case-insensitive partial match)
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string|null $searchTerm Search term to match against title
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  string|null  $searchTerm  Search term to match against title
      */
     public function scopeSearchByTitle(Builder $query, ?string $searchTerm): Builder
     {
         if ($searchTerm && trim($searchTerm) !== '') {
-            $query->where('title', 'LIKE', '%' . trim($searchTerm) . '%');
+            $query->where('title', 'LIKE', '%'.trim($searchTerm).'%');
         }
 
         return $query;
     }
 }
-

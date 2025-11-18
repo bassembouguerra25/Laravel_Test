@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 /**
  * User Model Test
- * 
+ *
  * Tests User model relationships and helper methods
  */
 class UserModelTest extends TestCase
@@ -88,4 +88,3 @@ class UserModelTest extends TestCase
         $this->assertFalse($admin->isCustomer());
     }
 }
-

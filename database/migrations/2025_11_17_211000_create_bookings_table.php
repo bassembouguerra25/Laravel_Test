@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates the bookings table with columns:
      * - id, user_id (foreign key to users), ticket_id (foreign key to tickets),
      *   quantity, status (pending, confirmed, cancelled)
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
-            
+
             // Indexes to improve query performance
             $table->index('user_id');
             $table->index('ticket_id');

@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * User Controller
- * 
+ *
  * Handles user authentication endpoints:
  * - Register: Create a new user account
  * - Login: Authenticate user and return token
@@ -29,9 +29,6 @@ class UserController extends Controller
 
     /**
      * Register a new user
-     *
-     * @param \App\Http\Requests\Auth\RegisterRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -62,9 +59,7 @@ class UserController extends Controller
     /**
      * Login user and generate authentication token
      *
-     * @param \App\Http\Requests\Auth\LoginRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     * 
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function login(LoginRequest $request): JsonResponse
@@ -72,7 +67,7 @@ class UserController extends Controller
         $credentials = $request->validated();
 
         // Attempt to authenticate user
-        if (!Auth::attempt($credentials)) {
+        if (! Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -98,9 +93,6 @@ class UserController extends Controller
 
     /**
      * Logout authenticated user (revoke token)
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
@@ -115,9 +107,6 @@ class UserController extends Controller
 
     /**
      * Get authenticated user information
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function me(Request $request): JsonResponse
     {

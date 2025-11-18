@@ -12,7 +12,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Main database seeder
- * 
+ *
  * Creates initial data according to specifications:
  * - 2 administrators
  * - 3 organizers
@@ -27,8 +27,6 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -61,7 +59,7 @@ class DatabaseSeeder extends Seeder
         foreach ($organizers as $index => $organizer) {
             // Each organizer creates at least one event
             $eventCount = $index < 2 ? 2 : 1; // First 2 create 2 events each, last one creates 1
-            
+
             $organizerEvents = Event::factory()
                 ->count($eventCount)
                 ->forOrganizer($organizer)
@@ -78,7 +76,7 @@ class DatabaseSeeder extends Seeder
                 ->forOrganizer($organizers->random())
                 ->upcoming()
                 ->create();
-            
+
             $events = $events->merge($remainingEvents);
         }
 
@@ -91,7 +89,7 @@ class DatabaseSeeder extends Seeder
         $tickets = collect();
         foreach ($events as $event) {
             $ticketCount = 3; // 3 tickets per event = 15 tickets total
-            
+
             $eventTickets = Ticket::factory()
                 ->count($ticketCount)
                 ->state(['event_id' => $event->id])
@@ -166,10 +164,6 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Selects an element randomly based on weights
-     *
-     * @param array $items
-     * @param array $weights
-     * @return mixed
      */
     private function weightedRandom(array $items, array $weights): mixed
     {

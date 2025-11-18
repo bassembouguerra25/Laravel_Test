@@ -38,4 +38,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bookings', BookingController::class)->except(['store']);
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 });
-

@@ -6,15 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Update Event Request
- * 
+ *
  * Validates event update data
  */
 class UpdateEventRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {

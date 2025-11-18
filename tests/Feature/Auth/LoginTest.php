@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 /**
  * Login Test
- * 
+ *
  * Tests user login endpoint
  */
 class LoginTest extends TestCase

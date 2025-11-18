@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates the payments table with columns:
      * - id, booking_id (foreign key to bookings, hasOne relationship),
      *   amount, status (success, failed, refunded)
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('status', ['success', 'failed', 'refunded'])->default('failed');
             $table->timestamps();
-            
+
             // Indexes to improve query performance
             $table->index('booking_id');
             $table->index('status');

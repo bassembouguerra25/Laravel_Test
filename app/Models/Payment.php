@@ -8,18 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Payment Model
- * 
+ *
  * Represents a payment associated with a booking.
  * A payment can be successful, failed, or refunded.
  * HasOne relationship with Booking (one booking has one payment).
- * 
+ *
  * @property int $id
  * @property int $booking_id ID of the associated booking
  * @property float $amount Payment amount
  * @property string $status Payment status: success, failed, refunded
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
  * @property-read \App\Models\Booking $booking The associated booking
  */
 class Payment extends Model
@@ -52,8 +51,6 @@ class Payment extends Model
 
     /**
      * Relation: A payment belongs to a booking
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function booking(): BelongsTo
     {
@@ -62,8 +59,6 @@ class Payment extends Model
 
     /**
      * Check if the payment was successful
-     *
-     * @return bool
      */
     public function isSuccess(): bool
     {
@@ -72,8 +67,6 @@ class Payment extends Model
 
     /**
      * Check if the payment failed
-     *
-     * @return bool
      */
     public function isFailed(): bool
     {
@@ -82,8 +75,6 @@ class Payment extends Model
 
     /**
      * Check if the payment was refunded
-     *
-     * @return bool
      */
     public function isRefunded(): bool
     {

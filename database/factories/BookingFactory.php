@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory for the Booking model
- * 
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Booking>
  */
 class BookingFactory extends Factory
@@ -30,8 +30,6 @@ class BookingFactory extends Factory
 
     /**
      * Indicate that the booking is pending.
-     *
-     * @return static
      */
     public function pending(): static
     {
@@ -42,8 +40,6 @@ class BookingFactory extends Factory
 
     /**
      * Indicate that the booking is confirmed.
-     *
-     * @return static
      */
     public function confirmed(): static
     {
@@ -54,8 +50,6 @@ class BookingFactory extends Factory
 
     /**
      * Indicate that the booking is cancelled.
-     *
-     * @return static
      */
     public function cancelled(): static
     {
@@ -66,9 +60,6 @@ class BookingFactory extends Factory
 
     /**
      * Indicate that the booking is for a specific user.
-     *
-     * @param User $user
-     * @return static
      */
     public function forUser(User $user): static
     {
@@ -79,9 +70,6 @@ class BookingFactory extends Factory
 
     /**
      * Indicate that the booking is for a specific ticket.
-     *
-     * @param Ticket $ticket
-     * @return static
      */
     public function forTicket(Ticket $ticket): static
     {

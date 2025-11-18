@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory for the Ticket model
- * 
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ticket>
  */
 class TicketFactory extends Factory
@@ -31,8 +31,6 @@ class TicketFactory extends Factory
 
     /**
      * Indicate that the ticket is of type VIP.
-     *
-     * @return static
      */
     public function vip(): static
     {
@@ -44,8 +42,6 @@ class TicketFactory extends Factory
 
     /**
      * Indicate that the ticket is of type Standard.
-     *
-     * @return static
      */
     public function standard(): static
     {
@@ -57,8 +53,6 @@ class TicketFactory extends Factory
 
     /**
      * Indicate that the ticket is of type Premium.
-     *
-     * @return static
      */
     public function premium(): static
     {
@@ -70,9 +64,6 @@ class TicketFactory extends Factory
 
     /**
      * Indicate that the ticket has a limited quantity.
-     *
-     * @param int $quantity
-     * @return static
      */
     public function limitedQuantity(int $quantity): static
     {
@@ -83,9 +74,6 @@ class TicketFactory extends Factory
 
     /**
      * Indicate that the ticket is for a specific event.
-     *
-     * @param Event $event
-     * @return static
      */
     public function forEvent(Event $event): static
     {

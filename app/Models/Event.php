@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Event Model
- * 
+ *
  * Represents an event that can have multiple ticket types.
  * Each event is created by a user (organizer or admin).
- * 
+ *
  * @property int $id
  * @property string $title
  * @property string|null $description
@@ -22,13 +22,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $created_by ID of the user who created the event
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
  * @property-read \App\Models\User $organizer The user who created the event
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Ticket> $tickets
  */
 class Event extends Model
 {
-    use HasFactory, CommonQueryScopes;
+    use CommonQueryScopes, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -57,8 +56,6 @@ class Event extends Model
 
     /**
      * Relation: An event belongs to a user (organizer/admin)
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function organizer(): BelongsTo
     {
@@ -67,8 +64,6 @@ class Event extends Model
 
     /**
      * Relation: An event can have multiple tickets
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function tickets(): HasMany
     {

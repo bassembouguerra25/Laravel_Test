@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Booking Controller
- * 
+ *
  * Handles CRUD operations for bookings
  */
 class BookingController extends Controller
@@ -24,15 +24,11 @@ class BookingController extends Controller
 
     /**
      * Payment service instance
-     *
-     * @var \App\Services\PaymentService
      */
     protected PaymentService $paymentService;
 
     /**
      * Create a new controller instance
-     *
-     * @param \App\Services\PaymentService $paymentService
      */
     public function __construct(PaymentService $paymentService)
     {
@@ -41,28 +37,25 @@ class BookingController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
 
         // Check authorization
-        if (!$user->can('viewAny', Booking::class)) {
+        if (! $user->can('viewAny', Booking::class)) {
             return $this->forbiddenResponse('You do not have permission to view bookings.');
         }
 
         $query = Booking::query()->with(['user', 'ticket', 'payment']);
 
         // Filter by user (customers see only their bookings)
-        if ($user->isCustomer() && !$user->isAdmin()) {
+        if ($user->isCustomer() && ! $user->isAdmin()) {
             $query->where('user_id', $user->id);
         }
 
         // Filter by organizer (see bookings for their events)
-        if ($user->isOrganizer() && !$user->isAdmin()) {
+        if ($user->isOrganizer() && ! $user->isAdmin()) {
             $query->whereHas('ticket.event', function ($q) use ($user) {
                 $q->where('created_by', $user->id);
             });
@@ -98,9 +91,6 @@ class BookingController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\StoreBookingRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreBookingRequest $request): JsonResponse
     {
@@ -109,17 +99,17 @@ class BookingController extends Controller
 
         // Check if event is past before starting transaction
         $ticket = \App\Models\Ticket::with('event')->findOrFail($validated['ticket_id']);
-        
+
         // Check if event exists and is in the past
         if ($ticket->event_id && $ticket->event && $ticket->event->date) {
             $event = $ticket->event;
-            
+
             // Date is already cast to Carbon in Event model (cast: 'datetime')
             // Use it directly - if it's already Carbon, use it, otherwise parse it
-            $eventDate = $event->date instanceof \Illuminate\Support\Carbon 
-                ? $event->date 
+            $eventDate = $event->date instanceof \Illuminate\Support\Carbon
+                ? $event->date
                 : \Illuminate\Support\Carbon::parse($event->date);
-            
+
             // Check if event date is in the past
             // isPast() checks if the date is before now()
             // Use errorResponse() here as ValidationException is not properly handled outside DB transaction
@@ -176,15 +166,11 @@ class BookingController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Models\Booking $booking
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Booking $booking, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('view', $booking)) {
+        if (! $request->user()->can('view', $booking)) {
             return $this->forbiddenResponse('You do not have permission to view this booking.');
         }
 
@@ -197,10 +183,6 @@ class BookingController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\UpdateBookingRequest $request
-     * @param \App\Models\Booking $booking
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateBookingRequest $request, Booking $booking): JsonResponse
     {
@@ -211,20 +193,20 @@ class BookingController extends Controller
             // Handle quantity change - verify availability
             if (isset($validated['quantity']) && $validated['quantity'] != $booking->quantity) {
                 // Load ticket relation if not loaded, then lock it
-                if (!$booking->relationLoaded('ticket')) {
+                if (! $booking->relationLoaded('ticket')) {
                     $booking->load('ticket');
                 }
-                
+
                 $ticket = \App\Models\Ticket::lockForUpdate()->findOrFail($booking->ticket_id);
-                
+
                 // Calculate available quantity excluding current booking
                 $currentBookedQuantity = $ticket->bookings()
                     ->where('id', '!=', $booking->id)
                     ->whereIn('status', ['pending', 'confirmed'])
                     ->sum('quantity');
-                
+
                 $availableQuantity = max(0, $ticket->quantity - $currentBookedQuantity);
-                
+
                 if ($validated['quantity'] > $availableQuantity) {
                     throw new \Illuminate\Validation\ValidationException(
                         validator([], []),
@@ -238,7 +220,7 @@ class BookingController extends Controller
                 $booking->update($validated);
 
                 // Create confirmed payment using PaymentService if not exists
-                if (!$booking->payment) {
+                if (! $booking->payment) {
                     $this->paymentService->createConfirmedPayment($booking->fresh());
                 }
 
@@ -260,15 +242,11 @@ class BookingController extends Controller
 
     /**
      * Cancel a booking (alias for update with status cancelled).
-     *
-     * @param \App\Models\Booking $booking
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function cancel(Booking $booking, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('cancel', $booking)) {
+        if (! $request->user()->can('cancel', $booking)) {
             return $this->forbiddenResponse('You do not have permission to cancel this booking.');
         }
 
@@ -304,15 +282,11 @@ class BookingController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Booking $booking
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Booking $booking, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('delete', $booking)) {
+        if (! $request->user()->can('delete', $booking)) {
             return $this->forbiddenResponse('You do not have permission to delete this booking.');
         }
 

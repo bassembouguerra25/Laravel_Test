@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 /**
  * Ticket Test
- * 
+ *
  * Tests Tickets CRUD operations and authorization
  */
 class TicketTest extends TestCase
@@ -187,7 +187,7 @@ class TicketTest extends TestCase
         $response = $this->getJson('/api/tickets?available_only=1');
 
         $response->assertStatus(200);
-        
+
         // Should only show ticket with stock
         $ticketIds = collect($response->json('data.tickets'))->pluck('id');
         $this->assertContains($ticketWithStock->id, $ticketIds);

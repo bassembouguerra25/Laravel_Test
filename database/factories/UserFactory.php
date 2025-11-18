@@ -36,8 +36,6 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model should be an administrator.
-     *
-     * @return static
      */
     public function admin(): static
     {
@@ -48,8 +46,6 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model should be an organizer.
-     *
-     * @return static
      */
     public function organizer(): static
     {
@@ -60,8 +56,6 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model should be a customer.
-     *
-     * @return static
      */
     public function customer(): static
     {
@@ -72,8 +66,6 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model's email address should be unverified.
-     *
-     * @return static
      */
     public function unverified(): static
     {

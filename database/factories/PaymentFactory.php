@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory for the Payment model
- * 
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Payment>
  */
 class PaymentFactory extends Factory
@@ -28,8 +28,6 @@ class PaymentFactory extends Factory
 
     /**
      * Indicate that the payment was successful.
-     *
-     * @return static
      */
     public function success(): static
     {
@@ -40,8 +38,6 @@ class PaymentFactory extends Factory
 
     /**
      * Indicate that the payment failed.
-     *
-     * @return static
      */
     public function failed(): static
     {
@@ -52,8 +48,6 @@ class PaymentFactory extends Factory
 
     /**
      * Indicate that the payment was refunded.
-     *
-     * @return static
      */
     public function refunded(): static
     {
@@ -64,9 +58,6 @@ class PaymentFactory extends Factory
 
     /**
      * Indicate that the payment is for a specific booking.
-     *
-     * @param Booking $booking
-     * @return static
      */
     public function forBooking(Booking $booking): static
     {

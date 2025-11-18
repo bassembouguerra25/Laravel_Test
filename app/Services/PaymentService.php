@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Payment Service
- * 
+ *
  * Service class for handling payment processing.
  * Simulates payment success/failure for bookings.
  */
@@ -18,8 +18,6 @@ class PaymentService
     /**
      * Process payment for a booking
      *
-     * @param \App\Models\Booking $booking
-     * @return \App\Models\Payment
      * @throws \Exception
      */
     public function processPayment(Booking $booking): Payment
@@ -64,12 +62,10 @@ class PaymentService
 
     /**
      * Create confirmed payment for a booking
-     * 
+     *
      * Used when booking is manually confirmed (by admin/organizer).
      * Creates a payment with success status without simulation.
      *
-     * @param \App\Models\Booking $booking
-     * @return \App\Models\Payment
      * @throws \Exception
      */
     public function createConfirmedPayment(Booking $booking): Payment
@@ -105,15 +101,13 @@ class PaymentService
     /**
      * Refund payment for a booking
      *
-     * @param \App\Models\Booking $booking
-     * @return \App\Models\Payment
      * @throws \Exception
      */
     public function refundPayment(Booking $booking): Payment
     {
         $payment = $booking->payment;
 
-        if (!$payment) {
+        if (! $payment) {
             throw new \Exception('No payment found for this booking.');
         }
 
@@ -145,12 +139,11 @@ class PaymentService
 
     /**
      * Simulate payment processing
-     * 
+     *
      * In a real application, this would call a payment gateway API.
      * For this test, we simulate success/failure based on random chance
      * or business rules (e.g., always success for amounts > 0).
      *
-     * @param float $amount
      * @return bool true if payment succeeds, false if it fails
      */
     protected function simulatePayment(float $amount): bool
@@ -163,7 +156,7 @@ class PaymentService
         // For testing: 95% success rate
         // In production, this would call actual payment gateway
         $successRate = 0.95;
+
         return rand(1, 100) / 100 <= $successRate;
     }
 }
-

@@ -2,12 +2,11 @@
 
 namespace Tests\Feature\Auth;
 
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
  * Logout Test
- * 
+ *
  * Tests user logout endpoint
  */
 class LogoutTest extends TestCase
@@ -22,7 +21,7 @@ class LogoutTest extends TestCase
 
         // Use token for authentication
         $response = $this->postJson('/api/logout', [], [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertStatus(200)
@@ -59,7 +58,7 @@ class LogoutTest extends TestCase
 
         // Logout with token1
         $response = $this->postJson('/api/logout', [], [
-            'Authorization' => 'Bearer ' . $token1,
+            'Authorization' => 'Bearer '.$token1,
         ]);
 
         $response->assertStatus(200);

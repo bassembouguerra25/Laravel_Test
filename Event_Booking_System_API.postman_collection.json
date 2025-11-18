@@ -683,7 +683,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost/api",
+			"value": "http://localhost",
 			"type": "string"
 		},
 		{

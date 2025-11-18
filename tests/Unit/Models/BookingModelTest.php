@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 /**
  * Booking Model Test
- * 
+ *
  * Tests Booking model relationships, accessors, and helper methods
  */
 class BookingModelTest extends TestCase
@@ -100,4 +100,3 @@ class BookingModelTest extends TestCase
         $this->assertTrue($cancelled->isCancelled());
     }
 }
-

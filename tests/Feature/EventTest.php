@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 /**
  * Event Test
- * 
+ *
  * Tests Events CRUD operations and authorization
  */
 class EventTest extends TestCase

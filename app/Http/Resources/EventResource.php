@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Event Resource
- * 
+ *
  * Transforms Event model to JSON response
  */
 class EventResource extends JsonResource
@@ -28,7 +28,7 @@ class EventResource extends JsonResource
             'created_by' => $this->created_by,
             'organizer' => new UserResource($this->whenLoaded('organizer')),
             'tickets' => TicketResource::collection($this->whenLoaded('tickets')),
-            'tickets_count' => $this->when($this->relationLoaded('tickets'), fn() => $this->tickets->count()),
+            'tickets_count' => $this->when($this->relationLoaded('tickets'), fn () => $this->tickets->count()),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

@@ -1,0 +1,25 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - config
+        - database
+        - routes
+
+    # Rule level (0 is the loosest and 9 is the strictest)
+    level: 5
+
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+
+    excludePaths:
+        - ./*/*/FileToIgnore.php
+
+    # Laravel specific
+    checkModelProperties: true
+
+    # Analysis cache
+    tmpDir: storage/.phpstan
+

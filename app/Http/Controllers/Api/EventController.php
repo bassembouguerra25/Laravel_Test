@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Event Controller
- * 
+ *
  * Handles CRUD operations for events
  */
 class EventController extends Controller
@@ -23,28 +23,25 @@ class EventController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
 
         // Check authorization
-        if (!$user->can('viewAny', Event::class)) {
+        if (! $user->can('viewAny', Event::class)) {
             return $this->forbiddenResponse('You do not have permission to view events.');
         }
 
         // Build cache key based on user role and request parameters
-        $cacheKey = 'events_list_' . md5(
-            $user->id . '_' .
-            ($user->isOrganizer() && !$user->isAdmin() ? 'organizer' : 'all') . '_' .
-            $request->get('search') . '_' .
-            $request->get('date_from') . '_' .
-            $request->get('date_to') . '_' .
-            $request->get('sort_by', 'date') . '_' .
-            $request->get('sort_order', 'asc') . '_' .
+        $cacheKey = 'events_list_'.md5(
+            $user->id.'_'.
+            ($user->isOrganizer() && ! $user->isAdmin() ? 'organizer' : 'all').'_'.
+            $request->get('search').'_'.
+            $request->get('date_from').'_'.
+            $request->get('date_to').'_'.
+            $request->get('sort_by', 'date').'_'.
+            $request->get('sort_order', 'asc').'_'.
             $request->get('per_page', 15)
         );
 
@@ -53,7 +50,7 @@ class EventController extends Controller
             $query = Event::query()->with(['organizer', 'tickets']);
 
             // Filter by organizer for non-admin users
-            if ($user->isOrganizer() && !$user->isAdmin()) {
+            if ($user->isOrganizer() && ! $user->isAdmin()) {
                 $query->where('created_by', $user->id);
             }
 
@@ -62,7 +59,7 @@ class EventController extends Controller
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->searchByTitle($search)
-                      ->orWhere('location', 'like', "%{$search}%");
+                        ->orWhere('location', 'like', "%{$search}%");
                 });
             }
 
@@ -93,9 +90,6 @@ class EventController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\StoreEventRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreEventRequest $request): JsonResponse
     {
@@ -117,15 +111,11 @@ class EventController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Models\Event $event
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Event $event, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('view', $event)) {
+        if (! $request->user()->can('view', $event)) {
             return $this->forbiddenResponse('You do not have permission to view this event.');
         }
 
@@ -138,10 +128,6 @@ class EventController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\UpdateEventRequest $request
-     * @param \App\Models\Event $event
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
     {
@@ -160,15 +146,11 @@ class EventController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Event $event
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Event $event, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('delete', $event)) {
+        if (! $request->user()->can('delete', $event)) {
             return $this->forbiddenResponse('You do not have permission to delete this event.');
         }
 
@@ -185,19 +167,17 @@ class EventController extends Controller
 
     /**
      * Clear events cache
-     * 
+     *
      * In production with Redis, you could use Cache::tags(['events'])->flush()
      * For now, we flush all cache as a simple approach.
      * In a more sophisticated implementation, we could clear only cache keys
      * matching 'events_list_*' pattern.
-     *
-     * @return void
      */
     protected function clearEventsCache(): void
     {
         // Note: In production with Redis and cache tags support, you could use:
         // Cache::tags(['events'])->flush();
-        
+
         // For simplicity and compatibility with all cache drivers, flush all cache
         // This ensures events list is always fresh after modifications
         Cache::flush();

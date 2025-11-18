@@ -23,7 +23,7 @@ A comprehensive REST API for event booking management built with Laravel 12, fea
 
 ## Installation
 
-### Using Docker (Recommended)
+### Quick Start (Recommended)
 
 1. **Clone the repository**
    ```bash
@@ -31,12 +31,7 @@ A comprehensive REST API for event booking management built with Laravel 12, fea
    cd laravel_test
    ```
 
-2. **Install dependencies**
-   ```bash
-   docker run --rm -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install
-   ```
-
-3. **Set up environment variables**
+2. **Set up environment variables** (if not already done)
    ```bash
    cp .env.example .env
    ```
@@ -56,24 +51,69 @@ A comprehensive REST API for event booking management built with Laravel 12, fea
 
    QUEUE_CONNECTION=redis
    CACHE_STORE=redis
+
+   WWWUSER=1000
+   WWWGROUP=1000
+   MYSQL_EXTRA_OPTIONS=
    ```
 
-4. **Start Docker containers**
+3. **Start the project** (builds, migrates, and seeds automatically)
    ```bash
-   docker compose up -d
+   ./start.sh
    ```
 
-5. **Generate application key**
+   This script will:
+   - Build Docker containers
+   - Start all services (MySQL, Redis, phpMyAdmin)
+   - Generate application key
+   - Run database migrations
+   - Seed the database with sample data
+   - Clear all caches
+
+4. **Stop the project**
+   ```bash
+   ./stop.sh
+   ```
+
+5. **Clean the project** (remove caches, logs, temporary files)
+   ```bash
+   ./clean.sh
+   ```
+   
+   This script will:
+   - Clear all Laravel caches (config, cache, route, view, event)
+   - Remove log files
+   - Remove compiled cache files
+   - Remove framework cache files (sessions, views)
+   - Remove PHPUnit cache files
+   - Remove frontend build files
+   - Optionally remove `node_modules`, `vendor`, and lock files (with confirmation)
+
+### Manual Installation
+
+If you prefer to set up manually:
+
+1. **Install dependencies**
+   ```bash
+   docker run --rm -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install
+   ```
+
+2. **Start Docker containers**
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Generate application key**
    ```bash
    docker compose exec laravel.test php artisan key:generate
    ```
 
-6. **Run migrations**
+4. **Run migrations**
    ```bash
    docker compose exec laravel.test php artisan migrate
    ```
 
-7. **Seed the database** (optional, creates sample data)
+5. **Seed the database** (optional, creates sample data)
    ```bash
    docker compose exec laravel.test php artisan db:seed
    ```
@@ -86,30 +126,161 @@ A comprehensive REST API for event booking management built with Laravel 12, fea
    - 15 tickets
    - 20 bookings
 
-### Manual Installation
+### Installation Without Docker
 
-1. **Install dependencies**
+If you prefer to install and run the project without Docker:
+
+#### Prerequisites
+
+Install the following on your system:
+
+- **PHP 8.2+** with extensions:
+  - `php-cli`
+  - `php-fpm` (or PHP built-in server)
+  - `php-mysql` (PDO MySQL extension)
+  - `php-redis` (for Redis cache and queues)
+  - `php-mbstring`
+  - `php-xml`
+  - `php-bcmath`
+  - `php-curl`
+  - `php-zip`
+  - `php-openssl`
+
+- **Composer** (PHP package manager)
+- **MySQL 8.0+** or MariaDB
+- **Redis** (for caching and queues)
+- **Node.js** and **npm** (optional, for frontend assets)
+
+#### Installation Steps
+
+1. **Install PHP dependencies**
    ```bash
    composer install
    ```
 
-2. **Set up environment**
+2. **Create environment file**
    ```bash
    cp .env.example .env
+   ```
+
+3. **Configure `.env` file**
+   
+   Update the following variables in `.env`:
+   ```env
+   APP_NAME="Event Booking System"
+   APP_URL=http://localhost:8000
+   
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=laravel
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+   
+   CACHE_STORE=redis
+   SESSION_DRIVER=redis
+   QUEUE_CONNECTION=redis
+   
+   REDIS_HOST=127.0.0.1
+   REDIS_PASSWORD=null
+   REDIS_PORT=6379
+   ```
+
+4. **Generate application key**
+   ```bash
    php artisan key:generate
    ```
 
-3. **Configure database** in `.env`
-
-4. **Run migrations**
-   ```bash
-   php artisan migrate
-   php artisan db:seed
+5. **Create database**
+   
+   Create a MySQL database:
+   ```sql
+   CREATE DATABASE laravel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
-5. **Start queue worker** (for notifications)
+6. **Run migrations**
+   ```bash
+   php artisan migrate
+   ```
+
+7. **Seed the database** (optional, creates sample data)
+   ```bash
+   php artisan db:seed
+   ```
+   
+   This will create:
+   - 2 administrators (password: `password`)
+   - 3 organizers
+   - 10 customers
+   - 5 events
+   - 15 tickets
+   - 20 bookings
+
+8. **Clear and cache configuration**
+   ```bash
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan route:clear
+   php artisan view:clear
+   ```
+
+#### Running the Application
+
+1. **Start the development server**
+   ```bash
+   php artisan serve
+   ```
+   The application will be available at `http://localhost:8000`
+
+2. **Start the queue worker** (required for notifications)
+   
+   Open a new terminal and run:
    ```bash
    php artisan queue:work
+   ```
+   
+   Or use supervisor/PM2 for production:
+   ```bash
+   php artisan queue:work --daemon --tries=3
+   ```
+
+#### Testing Without Docker
+
+Run tests with:
+```bash
+php artisan test
+```
+
+For coverage report (requires Xdebug or PCOV):
+```bash
+php artisan test --coverage
+```
+
+#### Production Setup
+
+For production deployment:
+
+1. **Optimize application**
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   php artisan optimize
+   ```
+
+2. **Set up a web server** (Nginx/Apache)
+   - Point document root to `public/` directory
+   - Configure proper PHP-FPM settings
+
+3. **Set up queue worker** (Supervisor/PM2 recommended)
+   ```bash
+   php artisan queue:work --daemon --tries=3 --timeout=90
+   ```
+
+4. **Set proper file permissions**
+   ```bash
+   chmod -R 755 storage bootstrap/cache
+   chown -R www-data:www-data storage bootstrap/cache
    ```
 
 ## API Documentation
@@ -271,6 +442,12 @@ All booking and payment operations use database transactions with row-level lock
 
 ## Development
 
+### Service URLs
+After starting the project with `./start.sh`, you can access:
+- **Application**: http://localhost
+- **API**: http://localhost/api
+- **phpMyAdmin**: http://localhost:8080
+
 ### Queue Worker
 Start the queue worker to process notifications:
 ```bash
@@ -282,13 +459,63 @@ Or manually:
 php artisan queue:work
 ```
 
-### Mail Testing
-The project uses Mailpit for local email testing (accessible at `http://localhost:8025` when using Docker).
-
 ### Code Quality
-- PSR-12 coding standards
+
+The project uses Laravel Pint and Larastan (PHPStan) for code quality:
+
+#### Laravel Pint (Code Formatter)
+
+Laravel Pint is a zero-dependency PHP code style fixer built on top of PHP-CS-Fixer.
+
+**Format code:**
+```bash
+# Format all code (auto-fix)
+composer format
+
+# Check code style without fixing
+composer format:test
+```
+
+**Using Docker:**
+```bash
+docker compose exec laravel.test vendor/bin/pint
+docker compose exec laravel.test vendor/bin/pint --test
+```
+
+#### Larastan (Static Analysis)
+
+Larastan is a static analysis tool that helps find bugs in your code before they happen.
+
+**Run static analysis:**
+```bash
+composer analyse
+```
+
+**Using Docker:**
+```bash
+docker compose exec laravel.test vendor/bin/phpstan analyse
+```
+
+#### Lint (Format + Analyse)
+
+Run both formatting check and static analysis:
+```bash
+composer lint
+```
+
+#### Configuration
+
+- **Pint**: Configuration in `pint.json` (uses PSR-12 preset)
+- **PHPStan**: Configuration in `phpstan.neon` (level 5)
+  - Analyzes: `app/`, `config/`, `database/`, `routes/`
+  - Excludes: `bootstrap/`, `storage/`, `vendor/`
+
+#### Standards
+
+- PSR-12 coding standards (enforced by Pint)
 - PHPDoc documentation for all methods
 - Type hints for all method parameters and return types
+- Level 5 static analysis (medium strictness)
 
 ## Project Structure
 

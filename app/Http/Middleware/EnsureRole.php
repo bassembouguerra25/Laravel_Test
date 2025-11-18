@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Ensure Role Middleware
- * 
+ *
  * Verifies that the authenticated user has one of the required roles.
  * Usage: ->middleware('role:admin,organizer')
  */
@@ -17,15 +17,12 @@ class EnsureRole
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
-     * @param string ...$roles Required roles (comma-separated)
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  string  ...$roles  Required roles (comma-separated)
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         // Check if user is authenticated
-        if (!$request->user()) {
+        if (! $request->user()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthenticated',
@@ -35,7 +32,7 @@ class EnsureRole
         $user = $request->user();
 
         // Check if user has one of the required roles
-        if (!in_array($user->role, $roles, true)) {
+        if (! in_array($user->role, $roles, true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden: Insufficient permissions',

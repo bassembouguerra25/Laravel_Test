@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 /**
  * Me Test
- * 
+ *
  * Tests authenticated user information endpoint
  */
 class MeTest extends TestCase

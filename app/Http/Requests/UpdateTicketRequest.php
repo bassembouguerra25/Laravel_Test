@@ -6,15 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Update Ticket Request
- * 
+ *
  * Validates ticket update data
  */
 class UpdateTicketRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {

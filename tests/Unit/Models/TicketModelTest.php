@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 /**
  * Ticket Model Test
- * 
+ *
  * Tests Ticket model relationships and accessors
  */
 class TicketModelTest extends TestCase
@@ -90,4 +90,3 @@ class TicketModelTest extends TestCase
         $this->assertEquals(0, $ticket->available_quantity);
     }
 }
-

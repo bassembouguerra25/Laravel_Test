@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Payment Resource
- * 
+ *
  * Transforms Payment model to JSON response
  */
 class PaymentResource extends JsonResource

@@ -7,13 +7,15 @@ use App\Models\Event;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Notifications\BookingConfirmedNotification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
  * Booking Test
- * 
+ *
  * Tests Bookings CRUD operations, business logic, and authorization
  */
 class BookingTest extends TestCase
@@ -321,6 +323,51 @@ class BookingTest extends TestCase
                 return $notification->booking->id === $booking->id;
             }
         );
+    }
+
+    /**
+     * Test notification implements ShouldQueue (is queued)
+     */
+    public function test_notification_implements_should_queue(): void
+    {
+        $booking = Booking::factory()->create();
+        $notification = new BookingConfirmedNotification($booking);
+
+        // Verify notification implements ShouldQueue interface
+        $this->assertInstanceOf(ShouldQueue::class, $notification);
+    }
+
+    /**
+     * Test notification is queued (not sent immediately)
+     */
+    public function test_notification_is_queued(): void
+    {
+        Queue::fake();
+
+        $admin = $this->createAdmin();
+        Sanctum::actingAs($admin);
+
+        $customer = $this->createCustomer();
+        $ticket = Ticket::factory()->create(['price' => 50.00]);
+        $booking = Booking::factory()
+            ->forUser($customer)
+            ->forTicket($ticket)
+            ->pending()
+            ->create(['quantity' => 2]);
+
+        $response = $this->putJson("/api/bookings/{$booking->id}", [
+            'status' => 'confirmed',
+        ]);
+
+        $response->assertStatus(200);
+
+        // Verify notification job was pushed to queue (asynchronous)
+        Queue::assertPushed(\Illuminate\Notifications\SendQueuedNotifications::class, function ($job) use ($booking) {
+            $notification = $job->notification;
+
+            return $notification instanceof BookingConfirmedNotification
+                && $notification->booking->id === $booking->id;
+        });
     }
 
     /**

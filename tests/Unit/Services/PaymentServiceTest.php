@@ -6,12 +6,11 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 /**
  * Payment Service Test
- * 
+ *
  * Unit tests for PaymentService class
  */
 class PaymentServiceTest extends TestCase
@@ -23,7 +22,7 @@ class PaymentServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->paymentService = new PaymentService();
+        $this->paymentService = new PaymentService;
     }
 
     /**
@@ -41,7 +40,7 @@ class PaymentServiceTest extends TestCase
         $paymentService = $this->getMockBuilder(PaymentService::class)
             ->onlyMethods(['simulatePayment'])
             ->getMock();
-        
+
         $paymentService->expects($this->once())
             ->method('simulatePayment')
             ->with(100.00) // 50.00 * 2
@@ -81,7 +80,7 @@ class PaymentServiceTest extends TestCase
         $paymentService = $this->getMockBuilder(PaymentService::class)
             ->onlyMethods(['simulatePayment'])
             ->getMock();
-        
+
         $paymentService->expects($this->once())
             ->method('simulatePayment')
             ->with(100.00)
@@ -213,7 +212,7 @@ class PaymentServiceTest extends TestCase
         $paymentService = $this->getMockBuilder(PaymentService::class)
             ->onlyMethods(['simulatePayment'])
             ->getMock();
-        
+
         $paymentService->method('simulatePayment')->willReturn(true);
 
         $payment = $paymentService->processPayment($booking);
@@ -318,4 +317,3 @@ class PaymentServiceTest extends TestCase
         $this->assertEquals('confirmed', $booking->status);
     }
 }
-

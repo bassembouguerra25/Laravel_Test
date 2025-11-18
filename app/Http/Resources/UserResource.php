@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * User Resource
- * 
+ *
  * Transforms User model to JSON response
  */
 class UserResource extends JsonResource

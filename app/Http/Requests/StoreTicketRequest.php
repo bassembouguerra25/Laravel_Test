@@ -6,25 +6,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Store Ticket Request
- * 
+ *
  * Validates ticket creation data
  */
 class StoreTicketRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         // Check if user can create tickets in general
-        if (!$this->user()->can('create', \App\Models\Ticket::class)) {
+        if (! $this->user()->can('create', \App\Models\Ticket::class)) {
             return false;
         }
 
         // If organizer (and not admin), verify they're creating ticket for their own event
-        if ($this->user()->isOrganizer() && !$this->user()->isAdmin()) {
+        if ($this->user()->isOrganizer() && ! $this->user()->isAdmin()) {
             $eventId = $this->input('event_id');
             if ($eventId) {
                 $event = \App\Models\Event::find($eventId);

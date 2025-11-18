@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'organizer', 'customer'])->default('customer');
             $table->rememberToken();
             $table->timestamps();
-            
+
             // Index to improve query performance by role
             $table->index('role');
         });

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates the events table with columns:
      * - id, title, description, date, location, created_by (foreign key to users)
      */
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('location');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
-            
+
             // Indexes to improve query performance
             $table->index('date');
             $table->index('location');

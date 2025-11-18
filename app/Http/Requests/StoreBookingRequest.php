@@ -4,19 +4,16 @@ namespace App\Http\Requests;
 
 use App\Models\Ticket;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 /**
  * Store Booking Request
- * 
+ *
  * Validates booking creation data
  */
 class StoreBookingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates the tickets table with columns:
      * - id, type (VIP, Standard, etc.), price, quantity, event_id (foreign key to events)
      */
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
             $table->timestamps();
-            
+
             // Indexes to improve query performance
             $table->index('event_id');
             $table->index('type');

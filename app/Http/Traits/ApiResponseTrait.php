@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 
 /**
  * API Response Trait
- * 
+ *
  * Provides standardized JSON response methods for API endpoints
  */
 trait ApiResponseTrait
@@ -14,10 +14,7 @@ trait ApiResponseTrait
     /**
      * Return a successful JSON response
      *
-     * @param mixed $data
-     * @param string|null $message
-     * @param int $statusCode
-     * @return \Illuminate\Http\JsonResponse
+     * @param  mixed  $data
      */
     protected function successResponse($data, ?string $message = null, int $statusCode = 200): JsonResponse
     {
@@ -36,11 +33,6 @@ trait ApiResponseTrait
 
     /**
      * Return an error JSON response
-     *
-     * @param string $message
-     * @param int $statusCode
-     * @param array $errors
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function errorResponse(string $message, int $statusCode = 400, array $errors = []): JsonResponse
     {
@@ -49,7 +41,7 @@ trait ApiResponseTrait
             'message' => $message,
         ];
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             $response['errors'] = $errors;
         }
 
@@ -58,9 +50,6 @@ trait ApiResponseTrait
 
     /**
      * Return a not found JSON response
-     *
-     * @param string|null $message
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function notFoundResponse(?string $message = null): JsonResponse
     {
@@ -72,9 +61,6 @@ trait ApiResponseTrait
 
     /**
      * Return an unauthorized JSON response
-     *
-     * @param string|null $message
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function unauthorizedResponse(?string $message = null): JsonResponse
     {
@@ -86,9 +72,6 @@ trait ApiResponseTrait
 
     /**
      * Return a forbidden JSON response
-     *
-     * @param string|null $message
-     * @return \Illuminate\Http\JsonResponse
      */
     protected function forbiddenResponse(?string $message = null): JsonResponse
     {
@@ -98,4 +81,3 @@ trait ApiResponseTrait
         );
     }
 }
-

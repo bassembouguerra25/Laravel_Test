@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * Factory for the Event model
- * 
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
  */
 class EventFactory extends Factory
@@ -43,10 +43,8 @@ class EventFactory extends Factory
 
     /**
      * Indicate that the event is created by an organizer.
-     *
-     * @return static
      */
-    public function forOrganizer(User $organizer = null): static
+    public function forOrganizer(?User $organizer = null): static
     {
         return $this->state(fn (array $attributes) => [
             'created_by' => $organizer?->id ?? User::factory()->organizer(),
@@ -55,8 +53,6 @@ class EventFactory extends Factory
 
     /**
      * Indicate that the event is in the past.
-     *
-     * @return static
      */
     public function past(): static
     {
@@ -67,8 +63,6 @@ class EventFactory extends Factory
 
     /**
      * Indicate that the event is in the future.
-     *
-     * @return static
      */
     public function upcoming(): static
     {

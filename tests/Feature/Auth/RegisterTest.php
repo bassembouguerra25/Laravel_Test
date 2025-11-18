@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 /**
  * Registration Test
- * 
+ *
  * Tests user registration endpoint
  */
 class RegisterTest extends TestCase

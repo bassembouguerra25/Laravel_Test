@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * Booking Resource
- * 
+ *
  * Transforms Booking model to JSON response
  */
 class BookingResource extends JsonResource

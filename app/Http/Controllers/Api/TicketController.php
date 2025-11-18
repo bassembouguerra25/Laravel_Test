@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Ticket Controller
- * 
+ *
  * Handles CRUD operations for tickets
  */
 class TicketController extends Controller
@@ -23,16 +23,13 @@ class TicketController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
 
         // Check authorization
-        if (!$user->can('viewAny', Ticket::class)) {
+        if (! $user->can('viewAny', Ticket::class)) {
             return $this->forbiddenResponse('You do not have permission to view tickets.');
         }
 
@@ -44,7 +41,7 @@ class TicketController extends Controller
         }
 
         // Filter by organizer for non-admin users
-        if ($user->isOrganizer() && !$user->isAdmin()) {
+        if ($user->isOrganizer() && ! $user->isAdmin()) {
             $query->whereHas('event', function ($q) use ($user) {
                 $q->where('created_by', $user->id);
             });
@@ -85,9 +82,6 @@ class TicketController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param \App\Http\Requests\StoreTicketRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreTicketRequest $request): JsonResponse
     {
@@ -108,15 +102,11 @@ class TicketController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param \App\Models\Ticket $ticket
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Ticket $ticket, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('view', $ticket)) {
+        if (! $request->user()->can('view', $ticket)) {
             return $this->forbiddenResponse('You do not have permission to view this ticket.');
         }
 
@@ -129,10 +119,6 @@ class TicketController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param \App\Http\Requests\UpdateTicketRequest $request
-     * @param \App\Models\Ticket $ticket
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateTicketRequest $request, Ticket $ticket): JsonResponse
     {
@@ -151,15 +137,11 @@ class TicketController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Ticket $ticket
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Ticket $ticket, Request $request): JsonResponse
     {
         // Check authorization
-        if (!$request->user()->can('delete', $ticket)) {
+        if (! $request->user()->can('delete', $ticket)) {
             return $this->forbiddenResponse('You do not have permission to delete this ticket.');
         }
 

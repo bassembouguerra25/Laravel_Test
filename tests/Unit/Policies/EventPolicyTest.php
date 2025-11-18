@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 /**
  * Event Policy Test
- * 
+ *
  * Tests Event authorization rules
  */
 class EventPolicyTest extends TestCase
@@ -18,7 +18,7 @@ class EventPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->policy = new EventPolicy();
+        $this->policy = new EventPolicy;
     }
 
     /**
@@ -151,4 +151,3 @@ class EventPolicyTest extends TestCase
         $this->assertTrue($this->policy->view($customer, $event));
     }
 }
-

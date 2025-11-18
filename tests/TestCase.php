@@ -11,9 +11,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Creates an authenticated user for testing
-     *
-     * @param array $attributes
-     * @return \App\Models\User
      */
     protected function createUser(array $attributes = []): \App\Models\User
     {
@@ -22,9 +19,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Creates an authenticated admin for testing
-     *
-     * @param array $attributes
-     * @return \App\Models\User
      */
     protected function createAdmin(array $attributes = []): \App\Models\User
     {
@@ -33,9 +27,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Creates an authenticated organizer for testing
-     *
-     * @param array $attributes
-     * @return \App\Models\User
      */
     protected function createOrganizer(array $attributes = []): \App\Models\User
     {
@@ -44,9 +35,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Creates an authenticated customer for testing
-     *
-     * @param array $attributes
-     * @return \App\Models\User
      */
     protected function createCustomer(array $attributes = []): \App\Models\User
     {

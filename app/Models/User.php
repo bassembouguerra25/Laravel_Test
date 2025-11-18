@@ -11,12 +11,12 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * User Model
- * 
+ *
  * Represents a system user with different roles:
  * - admin: can manage all events, tickets and bookings
  * - organizer: can create and manage their own events and tickets
  * - customer: can book tickets and view their bookings
- * 
+ *
  * @property int $id
  * @property string $name
  * @property string $email
@@ -27,7 +27,6 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Payment> $payments
@@ -75,8 +74,6 @@ class User extends Authenticatable
 
     /**
      * Relation: A user can create multiple events
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function events(): HasMany
     {
@@ -85,8 +82,6 @@ class User extends Authenticatable
 
     /**
      * Relation: A user can have multiple bookings
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function bookings(): HasMany
     {
@@ -95,8 +90,6 @@ class User extends Authenticatable
 
     /**
      * Relation: A user can have multiple payments (through their bookings)
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
     public function payments(): HasManyThrough
     {
@@ -105,8 +98,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is an administrator
-     *
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -115,8 +106,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is an organizer
-     *
-     * @return bool
      */
     public function isOrganizer(): bool
     {
@@ -125,8 +114,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is a customer
-     *
-     * @return bool
      */
     public function isCustomer(): bool
     {
